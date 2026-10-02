@@ -591,7 +591,7 @@ $("fichar-btn").onclick = async () => {
 })();
 
 // DEBUG-VV (temporal)
-(() => { const d=document.createElement("div"); d.id="dbgvv"; d.style.cssText="position:fixed;top:40px;right:4px;z-index:99;background:#f0f;color:#000;font:11px monospace;padding:2px;pointer-events:none;white-space:pre";
+(() => { const d=document.createElement("div"); d.id="dbgvv"; d.style.cssText="position:fixed;top:330px;left:4px;z-index:99;background:#ff0;color:#000;font:bold 16px monospace;padding:2px;pointer-events:none;white-space:pre";
  document.documentElement.append(d); const vv=visualViewport; setInterval(()=>{ d.textContent=`ih${innerHeight} vh${Math.round(vv.height)} ot${Math.round(vv.offsetTop)} sy${scrollY}\nch${document.documentElement.clientHeight} bh${document.body.scrollHeight} t${$("v-chat").getBoundingClientRect().bottom|0}`; },300); })();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
