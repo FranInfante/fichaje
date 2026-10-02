@@ -596,7 +596,8 @@ setH(); addEventListener("resize", () => { if (!document.body.classList.contains
 
 // DEBUG-VV (temporal)
 (() => { const d=document.createElement("div"); d.style.cssText="position:fixed;top:330px;left:4px;z-index:99;background:#ff0;color:#000;font:bold 16px monospace;padding:2px;pointer-events:none;white-space:pre";
- document.documentElement.append(d); const vv=visualViewport; setInterval(()=>{ d.textContent=`ih${innerHeight} vh${Math.round(vv.height)} ot${Math.round(vv.offsetTop)} sh${screen.height}`; },300); })();
+ document.documentElement.append(d); const vv=visualViewport; window.LOGV=[]; setInterval(()=>{ d.textContent=`ih${innerHeight} vh${Math.round(vv.height)} ot${Math.round(vv.offsetTop)} sy${scrollY}\n`+LOGV.join("\n"); },300);
+ $("chat-in").addEventListener("blur",()=>{ LOGV=[]; setTimeout(()=>{ LOGV.push("pre "+innerHeight); const m=document.querySelector("meta[name=viewport]"), c=m.content; m.content=c+",maximum-scale=1"; setTimeout(()=>{ m.content=c; LOGV.push("B "+innerHeight); setTimeout(()=>{ document.body.style.minHeight="calc(100% + 2px)"; window.scrollTo(0,2); setTimeout(()=>{ window.scrollTo(0,0); document.body.style.minHeight=""; LOGV.push("A "+innerHeight); },100); },600); },100); },600); }); })();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
 if (PAT) cargar(); else { $("setup").hidden = false; document.body.classList.add("logged-out"); }
