@@ -586,6 +586,8 @@ $("fichar-btn").onclick = async () => {
   input.addEventListener("focus", () => { document.body.classList.add("typing"); fit(); setTimeout(fit, 300); });
   input.addEventListener("blur", () => { setTimeout(() => { if (document.activeElement === input) return; document.body.classList.remove("typing"); chat.style.top = ""; chat.style.height = ""; window.scrollTo(0, 0); }, 100); });
   if (vv) { vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit); }
+  // Keep the keyboard open when tapping send, so the layout does not jump under the finger
+  $("chat-form").querySelector("button[type=submit]").addEventListener("pointerdown", e => { if (document.activeElement === input) e.preventDefault(); });
 })();
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
