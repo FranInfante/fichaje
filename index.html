@@ -336,6 +336,15 @@ function planDe(iso) {
   const tramos = (hor ? hor.valor.split(/\s+/) : cfg.horario_base).map(t => t.split("-"));
   const pasos = [];
   tramos.forEach(([a, b], i) => { pasos.push({ h: a, tipo: "Entrada", modo }); if (b) pasos.push({ h: b, tipo: i === tramos.length - 1 ? "Salida" : "Salida a comer" }); });
+  // 8-hour rule (same as the routine): the last exit is fixed, the afternoon entry absorbs the difference
+  const hechos = estado && estado.actualizado && estado.actualizado.startsWith(iso) ? estado.tramos || [] : [];
+  const cerrados = hechos.filter(t => t.out);
+  if (cerrados.length && tramos.length > 1 && !estado.dentro && hechos.length < tramos.length) {
+    const trabajado = cerrados.reduce((m, t) => m + min(t.out) - min(t.in), 0);
+    const fin = min(pasos[pasos.length - 1].h), salida = min(cerrados[cerrados.length - 1].out);
+    const a = Math.max(salida, fin - ((cfg.horas_dia || 8) * 60 - trabajado));
+    pasos[pasos.length - 2].h = String(Math.floor(a / 60)).padStart(2, "0") + ":" + String(a % 60).padStart(2, "0");
+  }
   return { modo, pasos, cambiado: !!hor };
 }
 
