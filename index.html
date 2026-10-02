@@ -72,12 +72,12 @@ a{color:var(--accent)}
 <body>
 <main>
   <section id="setup" class="card" hidden>
-    <h2>Conectar</h2>
-    <p style="margin-top:0">Pega aquí tu clave de GitHub (solo una vez en este móvil). Se queda guardada en este navegador y no sale de él.</p>
+    <h2>Entrar</h2>
     <form id="setup-form" class="form">
-      <label for="pat">Clave de GitHub (empieza por <code>github_pat_</code>)</label>
-      <input id="pat" type="password" autocomplete="off" required>
-      <button class="primary" type="submit">Conectar</button>
+      <input type="text" name="username" value="fran" autocomplete="username" hidden>
+      <label for="pat">Contraseña</label>
+      <input id="pat" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit">Entrar</button>
     </form>
   </section>
 
@@ -163,14 +163,13 @@ a{color:var(--accent)}
       </details>
     </section>
 
-    <p class="empty" style="text-align:center;font-size:.85rem;margin-top:16px">Woffu es lo oficial: aquí ves lo que la rutina leyó de Woffu en su última pasada. <button class="ghost" id="logout" type="button">Desconectar este móvil</button></p>
+    <p class="empty" style="text-align:center;font-size:.85rem;margin-top:16px">Woffu es lo oficial: aquí ves lo que la rutina leyó de Woffu en su última pasada. <button class="ghost" id="logout" type="button">Cerrar sesión</button></p>
   </div>
 </main>
 <div id="toast" class="toast" hidden></div>
 
 <script>
-const REPO = "FranInfante/fichaje-datos";
-const API = "https://api.github.com/repos/" + REPO + "/contents/";
+const API = "https://fichaje-api.fichaje-api.workers.dev/f/";
 const DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 const NOMBRE = { teletrabajo: "Teletrabajo", oficina: "En oficina MP", cliente: "En cliente" };
 const $ = id => document.getElementById(id);
@@ -187,8 +186,8 @@ const b64enc = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3500); }
 
 async function gh(path, opts = {}) {
-  const r = await fetch(API + path, { ...opts, headers: { Authorization: "Bearer " + PAT, Accept: "application/vnd.github+json", ...(opts.headers || {}) }, cache: "no-store" });
-  if (r.status === 401) { ls.del("pat"); throw new Error("La clave de GitHub no vale o ha caducado. Vuelve a conectar."); }
+  const r = await fetch(API + path, { ...opts, headers: { Authorization: "Bearer " + PAT, ...(opts.headers || {}) }, cache: "no-store" });
+  if (r.status === 401) { ls.del("pat"); PAT = null; throw new Error("Vuelve a entrar con tu contraseña."); }
   if (!r.ok) throw new Error("GitHub respondió " + r.status);
   return r.json();
 }
@@ -342,7 +341,13 @@ $("token-renovado").onclick = async () => {
   const nueva = isoMad(new Date(Date.now() + 90 * 864e5));
   try { const c = await leer("config.json"); c.data.token_caduca = nueva; await escribir("config.json", c.data, c.sha, "Token renovado"); cfg = c.data; render(); toast("Apuntado: caduca el " + nueva.split("-").reverse().join("/")); } catch (e) { toast(e.message); }
 };
-$("setup-form").onsubmit = ev => { ev.preventDefault(); PAT = $("pat").value.trim(); ls.set("pat", PAT); cargar(); };
+$("setup-form").onsubmit = async ev => {
+  ev.preventDefault();
+  const r = await fetch(API.replace("/f/", "/login"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("pat").value }) }).catch(() => null);
+  const j = r && await r.json().catch(() => ({}));
+  if (!r || !r.ok) return toast((j && j.error) || "No hay conexión");
+  PAT = j.session; ls.set("pat", PAT); $("pat").value = ""; cargar();
+};
 $("logout").onclick = () => { ls.del("pat"); location.reload(); };
 
 PAT = ls.get("pat");
