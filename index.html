@@ -83,6 +83,16 @@ a{color:var(--accent)}
 .login button{border-radius:14px;font-size:1.1rem}
 .login .note{color:var(--muted);font-size:.85rem;margin-top:18px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.chat-log{display:grid;gap:8px;max-height:340px;overflow-y:auto;margin-bottom:10px}
+.msg{padding:10px 14px;border-radius:14px;max-width:88%;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.bot{background:var(--bg);justify-self:start}
+.msg.me{background:var(--accent);color:var(--accent-fg);justify-self:end}
+.msg img{max-width:100%;border-radius:8px;display:block}
+.chat-form{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.chat-form button{min-height:48px;padding:0 16px}
+.clip{font-size:1.4rem;cursor:pointer;padding:0 4px;color:var(--fg)}
+.cambios{display:grid;gap:6px;margin-top:6px}
+.bm{display:inline-block;background:var(--accent);color:var(--accent-fg)!important;padding:4px 12px;border-radius:999px;text-decoration:none;font-weight:700}
 @media (max-width:360px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -121,6 +131,17 @@ a{color:var(--accent)}
     <section class="card" style="margin-top:16px">
       <h2>Avisos</h2>
       <ul id="avisos"></ul>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Pídemelo</h2>
+      <div id="chat-log" class="chat-log"><div class="msg bot">Dime qué cambia: «el jueves voy a oficina», «vacaciones del 20 al 24»… o sube una captura de Vision.</div></div>
+      <form id="chat-form" class="chat-form">
+        <label class="clip" title="Subir captura"><input id="chat-img" type="file" accept="image/*" hidden>📎</label>
+        <input id="chat-in" placeholder="Escribe aquí…" autocomplete="off">
+        <button class="primary" type="submit" aria-label="Enviar">➤</button>
+      </form>
+      <div id="chat-prev" class="empty" hidden></div>
     </section>
 
     <section class="card" style="margin-top:16px">
@@ -173,12 +194,11 @@ a{color:var(--accent)}
       <h2>Acceso a Woffu</h2>
       <p id="token-txt" style="margin:0 0 8px"></p>
       <details>
-        <summary>Renovar 90 días más</summary>
+        <summary>Renovar 90 días más (1 minuto)</summary>
         <ol>
-          <li>En el ordenador, entra en Woffu con Microsoft.</li>
-          <li>F12 → Application → Cookies → <code>woffu.token</code> → copia el valor.</li>
-          <li><a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a> → «Woffu autofichaje» → Edit → nube «Woffu» → engranaje → API credentials → pega el valor nuevo.</li>
-          <li>Pulsa aquí: <button class="ghost" id="token-renovado" type="button">Ya lo he renovado</button></li>
+          <li>Solo la primera vez, en el ordenador: arrastra este botón a la barra de marcadores → <a class="bm" id="bm">Renovar Fichaje</a></li>
+          <li>Entra en <a href="https://migso-pcubed.woffu.com" target="_blank" rel="noopener">Woffu</a> con Microsoft, como siempre.</li>
+          <li>Con Woffu abierto, pulsa el marcador «Renovar Fichaje». Te dirá ✅ y la fecha nueva.</li>
         </ol>
       </details>
     </section>
@@ -324,7 +344,7 @@ async function cargar() {
   try {
     const [c, e, a, s] = await Promise.all(["config.json", "excepciones.json", "avisos.json", "estado.json"].map(leer));
     cfg = c.data; exc = e.data; excSha = e.sha; avisos = a.data; estado = s.data;
-    $("setup").hidden = true; $("app").hidden = false; render();
+    $("setup").hidden = true; $("app").hidden = false; render(); tokenInfo();
   } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; } else if ($("app").hidden) { $("hero-big").textContent = "No he podido cargar"; $("hero-line").textContent = err.message; $("app").hidden = false; } }
 }
 
@@ -358,10 +378,6 @@ $("f-vac").onsubmit = ev => { ev.preventDefault(); const a = $("vac-desde").valu
 $("f-modo").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: $("modo-fecha").value, tipo: "MODO", valor: $("modo-valor").value }], "Modo", "Guardado"); };
 $("f-hor").onsubmit = ev => { ev.preventDefault(); const [a, b, c, d] = ["h1", "h2", "h3", "h4"].map(i => $(i).value); const v = b && c ? `${a}-${b} ${c}-${d}` : `${a}-${d}`; if (min(a) >= min(d)) return toast("La salida tiene que ser después de la entrada."); anadir([{ fecha: $("hor-fecha").value, tipo: "HORARIO", valor: v }], "Horario", "Horario guardado"); };
 $("f-corr").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: isoMad(new Date()), tipo: "CORREGIR", valor: $("corr-valor").value }], "Corregir hoy", "Apuntado. Recuerda cambiarlo a mano en Woffu"); };
-$("token-renovado").onclick = async () => {
-  const nueva = isoMad(new Date(Date.now() + 90 * 864e5));
-  try { const c = await leer("config.json"); c.data.token_caduca = nueva; await escribir("config.json", c.data, c.sha, "Token renovado"); cfg = c.data; render(); toast("Apuntado: caduca el " + nueva.split("-").reverse().join("/")); } catch (e) { toast(e.message); }
-};
 $("setup-form").onsubmit = async ev => {
   ev.preventDefault();
   const r = await fetch(API.replace("/f/", "/login"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("pat").value }) }).catch(() => null);
@@ -370,6 +386,57 @@ $("setup-form").onsubmit = async ev => {
   PAT = j.session; ls.set("pat", PAT); $("pat").value = ""; cargar();
 };
 $("logout").onclick = () => { ls.del("pat"); location.reload(); };
+
+
+$("bm").href = "javascript:(async()=>{let t=(document.cookie.match(/woffu\\.token=([^;]+)/)||[])[1];if(!t){for(const k of Object.keys(localStorage)){const v=localStorage.getItem(k)||'';const m=v.match(/eyJ[\\w-]+\\.[\\w-]+\\.[\\w-]+/);if(m){t=m[0];break}}}if(!t)return alert('No veo tu sesión de Woffu. Entra en Woffu y vuelve a pulsar.');const r=await fetch('https://fichaje-api.fichaje-api.workers.dev/woffu-token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:decodeURIComponent(t)})});const j=await r.json().catch(()=>({}));alert(r.ok?'✅ Fichaje renovado. Caduca el '+j.caduca:'❌ '+(j.error||r.status))})()";
+$("bm").onclick = e => { e.preventDefault(); toast("Arrástralo a la barra de marcadores; no se pulsa aquí."); };
+
+async function tokenInfo() {
+  try {
+    const r = await fetch("https://fichaje-api.fichaje-api.workers.dev/token-info", { headers: { Authorization: "Bearer " + PAT } });
+    const j = await r.json();
+    if (j.caduca) { cfg.token_caduca = j.caduca; render(); }
+  } catch {}
+}
+
+// Chat: the server asks Claude and returns a reply plus proposed changes; nothing is saved until Fran confirms
+const chatMsgs = []; let chatImg = null;
+function burbuja(quien, texto, img) {
+  const d = document.createElement("div"); d.className = "msg " + quien;
+  if (img) { const i = document.createElement("img"); i.src = img; d.append(i); }
+  if (texto) d.append(texto);
+  $("chat-log").append(d); $("chat-log").scrollTop = 1e9; return d;
+}
+const describe = c => fechaBonita(c.fecha) + ": " + (c.tipo === "NO_FICHAR" ? "no fichar" + (c.nota ? " (" + c.nota + ")" : "") : c.tipo === "MODO" ? NOMBRE[c.valor] || c.valor : "horario " + c.valor);
+$("chat-img").onchange = async () => {
+  const f = $("chat-img").files[0]; if (!f) return;
+  const img = await new Promise(res => { const im = new Image(); im.onload = () => res(im); im.src = URL.createObjectURL(f); });
+  const s = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+  c.width = img.width * s; c.height = img.height * s; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  chatImg = c.toDataURL("image/jpeg", 0.85);
+  $("chat-prev").hidden = false; $("chat-prev").textContent = "📎 Captura lista: escribe algo o pulsa ➤";
+};
+$("chat-form").onsubmit = async ev => {
+  ev.preventDefault();
+  const texto = $("chat-in").value.trim(); if (!texto && !chatImg) return;
+  burbuja("me", texto, chatImg); chatMsgs.push({ role: "user", content: texto || "Mira esta captura." });
+  const img = chatImg; chatImg = null; $("chat-in").value = ""; $("chat-prev").hidden = true; $("chat-img").value = "";
+  const espera = burbuja("bot", "Pensando…");
+  try {
+    const r = await fetch("https://fichaje-api.fichaje-api.workers.dev/chat", { method: "POST", headers: { Authorization: "Bearer " + PAT, "Content-Type": "application/json" }, body: JSON.stringify({ messages: chatMsgs, image: img }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    espera.textContent = j.respuesta; chatMsgs.push({ role: "assistant", content: j.respuesta });
+    const cambios = (j.cambios || []).filter(c => /^\d{4}-\d{2}-\d{2}$/.test(c.fecha) && ["NO_FICHAR", "MODO", "HORARIO"].includes(c.tipo));
+    if (cambios.length) {
+      const box = document.createElement("div"); box.className = "cambios";
+      cambios.forEach(c => { const l = document.createElement("div"); l.textContent = "• " + describe(c); box.append(l); });
+      const b = document.createElement("button"); b.className = "primary"; b.textContent = "Guardar " + cambios.length + (cambios.length > 1 ? " cambios" : " cambio");
+      b.onclick = async () => { b.disabled = true; await anadir(cambios.map(c => ({ fecha: c.fecha, tipo: c.tipo, valor: c.valor || "", nota: c.nota || "" })), "Desde el chat", "Guardado"); b.textContent = "✓ Guardado"; };
+      box.append(b); espera.append(box);
+    }
+  } catch (e) { espera.textContent = "No he podido responder: " + e.message; }
+};
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
