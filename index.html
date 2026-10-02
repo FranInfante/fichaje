@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#12865f">
+<meta name="theme-color" content="#047857">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -12,96 +12,148 @@
 <meta name="apple-mobile-web-app-title" content="Fichaje">
 <title>Fichaje</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <style>
+@font-face{font-family:"Geist";src:url("https://cdn.jsdelivr.net/npm/geist@1/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("https://cdn.jsdelivr.net/npm/geist@1/dist/fonts/geist-mono/GeistMono-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
 :root{
-  --bg:#f3f5f4; --card:#ffffff; --fg:#14201b; --muted:#5b6b64; --line:#dde4e0;
-  --in:#0f6b4f; --in-bg:#e2f3ec; --out:#8a5a00; --out-bg:#fbf0dc; --bad:#b3261e; --bad-bg:#fbe5e3;
-  --accent:#0f6b4f; --accent-fg:#ffffff;
-  --font:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;
+  --bg:#f4f4f5; --surface:#fafafa; --fg:#18181b; --muted:#63636b; --line:#e4e4e7;
+  --accent:#047857; --accent-fg:#fafafa; --accent-bg:#e6f4ee;
+  --bad:#b42318; --bad-bg:#fceceb;
+  --r:12px; --tab:64px; --ease:cubic-bezier(.16,1,.3,1);
+  --font:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sat:env(safe-area-inset-top); --sab:env(safe-area-inset-bottom);
 }
 @media (prefers-color-scheme: dark){:root{
-  --bg:#0e1412; --card:#17201c; --fg:#e8efec; --muted:#9aaba3; --line:#2a3631;
-  --in:#5fd3a5; --in-bg:#123a2c; --out:#f0b44c; --out-bg:#3a2b10; --bad:#ff8a80; --bad-bg:#3d1714;
-  --accent:#5fd3a5; --accent-fg:#06231a; color-scheme:dark}}
+  --bg:#09090b; --surface:#18181b; --fg:#f4f4f5; --muted:#a1a1aa; --line:#27272a;
+  --accent:#34d399; --accent-fg:#022c22; --accent-bg:#0f2a21;
+  --bad:#f87171; --bad-bg:#2a1415; color-scheme:dark}}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--fg)}
-body{font:18px/1.45 var(--font);padding:16px;padding-block:calc(16px + env(safe-area-inset-top)) calc(32px + env(safe-area-inset-bottom))}
-main{max-width:520px;margin:0 auto;display:grid;gap:16px}
-h2{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
-.hero{border:0;padding:22px 18px}
-.hero.in{background:var(--in-bg);color:var(--in)}
-.hero.out{background:var(--out-bg);color:var(--out)}
-.hero .big{font-size:2.6rem;font-weight:700;line-height:1;margin:2px 0 8px}
-.hero .line{font-size:1.15rem;color:var(--fg)}
-.hero .small{font-size:.9rem;color:var(--muted);margin-top:8px}
-.next{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.next .t{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
-.next .w{font-size:1.1rem}
-.next .w small{display:block;color:var(--muted);font-size:.9rem}
-ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.step{display:grid;grid-template-columns:4.2rem 1fr auto;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
-.step .h{font-weight:700;font-size:1.15rem}
-.step .s{color:var(--muted);font-size:.9rem}
-.chip{font-size:.85rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
-.chip.ok{background:var(--in-bg);color:var(--in)} .chip.wait{background:var(--line);color:var(--muted)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.off{background:var(--out-bg);color:var(--out)}
-.aviso{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
-.aviso .ico{width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;font-weight:700}
-.aviso .ico.ok{background:var(--in-bg);color:var(--in)} .aviso .ico.bad{background:var(--bad-bg);color:var(--bad)}
-.aviso b{display:block} .aviso span{color:var(--muted);font-size:.9rem}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html,body{margin:0;background:var(--bg);color:var(--fg);-webkit-text-size-adjust:100%}
+body{font:16px/1.5 var(--font);min-height:100dvh;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+h2{font-size:.875rem;font-weight:500;color:var(--muted);margin:0 0 12px;letter-spacing:0}
+section.blk{padding:24px 0;border-top:1px solid var(--line)}
+ul{list-style:none;margin:0;padding:0}
+a{color:var(--accent)}
+i.ph{font-size:1.25rem;line-height:1;flex:none}
+
+/* controls */
 button,select,input{font:inherit;color:var(--fg)}
-button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:14px 12px;cursor:pointer;font-weight:700;min-height:56px}
+button{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:0 14px;cursor:pointer;font-weight:500;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s var(--ease),background-color .2s var(--ease),opacity .2s var(--ease)}
+button:active{transform:scale(.98)}
 button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
-button.ghost{min-height:auto;padding:6px 12px;font-weight:400}
+button.ghost{min-height:36px;padding:0 10px;color:var(--muted);background:transparent;border-color:transparent}
 button:disabled{opacity:.5}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.form{display:grid;gap:10px;margin-top:12px}
-.form[hidden]{display:none}
-label{display:grid;gap:4px;font-size:.9rem;color:var(--muted)}
-input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:48px;width:100%}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+label{display:grid;gap:6px;font-size:.875rem;color:var(--muted)}
+input,select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 12px;min-height:48px;width:100%}
 input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left}
 input::-webkit-date-and-time-value{text-align:left}
+.form{display:grid;gap:12px;margin-top:16px}
 .form>*,.grid2>*,label{min-width:0}
-.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-.row .d{font-weight:700;font-variant-numeric:tabular-nums}
-.row small{display:block;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid2 button{justify-content:flex-start;font-size:.9375rem;gap:6px;padding:0 10px;white-space:nowrap}
 .empty{color:var(--muted)}
-.toast{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:var(--fg);color:var(--bg);padding:14px 16px;border-radius:12px;font-weight:700}
-.warn{border-color:var(--bad)}
-details summary{cursor:pointer;color:var(--accent);font-weight:700}
-details ol{padding-left:20px;display:grid;gap:6px;margin:10px 0 0}
-a{color:var(--accent)}
-.login{min-height:calc(100dvh - 32px);display:flex;flex-direction:column;justify-content:center;text-align:center;padding:0 8px}
-.login[hidden]{display:none}
-.login .logo{width:84px;height:84px;margin:0 auto 18px;border-radius:24px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-size:2.6rem;box-shadow:0 10px 30px rgba(15,107,79,.35)}
-.login h1{margin:0;font-size:2.2rem}
-.login .sub{margin:4px 0 28px;color:var(--muted)}
-.login .form{margin:0}
-.login input{font-size:1.15rem;text-align:center;min-height:58px;border-radius:14px;background:var(--card)}
-.login button{border-radius:14px;font-size:1.1rem}
-.login .note{color:var(--muted);font-size:.85rem;margin-top:18px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.chat-log{display:grid;gap:8px;max-height:340px;overflow-y:auto;margin-bottom:10px}
-.msg{padding:10px 14px;border-radius:14px;max-width:88%;white-space:pre-wrap;overflow-wrap:anywhere}
-.msg.bot{background:var(--bg);justify-self:start}
-.msg.me{background:var(--accent);color:var(--accent-fg);justify-self:end}
+
+/* skeleton */
+@keyframes sk{50%{opacity:.45}}
+.skel{height:1em;border-radius:6px;background:var(--line);animation:sk 1.4s ease-in-out infinite}
+.hero.loading #hero-big{display:inline-block;width:6ch;height:.9em;border-radius:8px;background:var(--line);color:transparent;animation:sk 1.4s ease-in-out infinite}
+
+/* inicio */
+#v-home{padding-top:calc(24px + var(--sat));padding-bottom:calc(var(--tab) + var(--sab) + 24px)}
+.hero{padding-bottom:24px}
+.hero .state{display:flex;align-items:center;gap:12px}
+.hero .dot{width:12px;height:12px;border-radius:50%;background:var(--muted);flex:none}
+.hero.in .dot{background:var(--accent);box-shadow:0 0 0 4px var(--accent-bg)}
+.hero .big{font-size:2.75rem;font-weight:600;line-height:1.05;letter-spacing:-.035em}
+.hero .line{margin-top:8px;color:var(--fg)}
+.hero .small{font-size:.875rem;color:var(--muted);margin-top:4px}
+.next{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.next .t{font-size:2rem;font-weight:500}
+.next .w{text-align:right}
+.next .w small{display:block;color:var(--muted);font-size:.875rem}
+.step{display:grid;grid-template-columns:4rem 1fr auto;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:0}
+.step .h{font-weight:500;font-size:1.0625rem}
+.step .s{color:var(--muted);font-size:.875rem}
+.chip{font-size:.8125rem;font-weight:500;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.chip.ok{background:var(--accent-bg);color:var(--accent)} .chip.wait,.chip.off{background:var(--line);color:var(--muted)} .chip.bad{background:var(--bad-bg);color:var(--bad)}
+.aviso{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:10px 0}
+.aviso .ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+.aviso .ico.ok{background:var(--accent-bg);color:var(--accent)} .aviso .ico.bad{background:var(--bad-bg);color:var(--bad)}
+.aviso .ico i.ph{font-size:1rem}
+.aviso b{display:block;font-weight:500} .aviso span{color:var(--muted);font-size:.875rem}
+.semana{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.dia{display:grid;justify-items:center;gap:6px;padding:12px 0;border:1px solid var(--line);border-radius:var(--r);font-size:.875rem;color:var(--muted);text-transform:capitalize}
+.dia i.ph{font-size:1.5rem;color:var(--fg)}
+.leyenda{font-size:.875rem;color:var(--muted);display:flex;gap:16px;margin:0 0 24px}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.leyenda i.ph{font-size:1rem}
+h2.sub{margin-top:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 0}
+.row .d{font-weight:500}
+.row small{display:block;color:var(--muted)}
+#token.warn #token-txt{color:var(--bad)}
+details summary{cursor:pointer;color:var(--accent);font-weight:500;min-height:44px;display:flex;align-items:center}
+details ol{padding-left:20px;display:grid;gap:8px;margin:4px 0 0}
+.bm{display:inline-block;background:var(--accent);color:var(--accent-fg)!important;padding:2px 10px;border-radius:6px;text-decoration:none;font-weight:500}
+.foot{padding:24px 0;border-top:1px solid var(--line);font-size:.875rem;color:var(--muted);display:flex;gap:12px;align-items:center;justify-content:space-between}
+.foot p{margin:0;max-width:34ch}
+
+/* chat */
+#v-chat{position:fixed;left:0;right:0;top:0;bottom:calc(var(--tab) + var(--sab));max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg)}
+.chat-head{padding:calc(14px + var(--sat)) 16px 12px;border-bottom:1px solid var(--line);font-weight:600;font-size:1.0625rem;letter-spacing:-.01em}
+.chat-head small{display:block;font-weight:400;font-size:.8125rem;color:var(--muted);letter-spacing:0}
+.chat-log{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+.msg{padding:10px 14px;border-radius:var(--r);max-width:86%;white-space:pre-wrap;overflow-wrap:anywhere;animation:in .25s var(--ease)}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.msg.bot{background:var(--surface);border:1px solid var(--line);align-self:flex-start}
+.msg.me{background:var(--accent);color:var(--accent-fg);align-self:flex-end}
 .msg img{max-width:100%;border-radius:8px;display:block}
+.ejemplos{display:grid;gap:8px;align-self:stretch;margin-top:4px}
+.ejemplos button{justify-content:flex-start;text-align:left;font-weight:400;min-height:48px;padding:10px 14px;height:auto}
+.cambios{display:grid;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);white-space:normal}
+.cambios button{margin-top:6px}
+.composer{padding:8px 16px 12px;border-top:1px solid var(--line);background:var(--bg)}
 .chat-form{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
-.chat-form button{min-height:48px;padding:0 16px}
-.clip{font-size:1.4rem;cursor:pointer;padding:0 4px;color:var(--fg)}
-.cambios{display:grid;gap:6px;margin-top:6px}
-.bm{display:inline-block;background:var(--accent);color:var(--accent-fg)!important;padding:4px 12px;border-radius:999px;text-decoration:none;font-weight:700}
+.chat-form button,.clip{min-width:48px;padding:0}
+.clip{display:grid;place-items:center;height:48px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);cursor:pointer;color:var(--fg);transition:transform .2s var(--ease)}
+.clip:active{transform:scale(.98)}
+.clip:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+#chat-in{background:var(--surface)}
+#chat-prev{font-size:.875rem;margin:0 0 8px;display:flex;align-items:center;gap:6px}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line);padding-bottom:var(--sab)}
+.tabbar nav{max-width:520px;margin:0 auto;height:var(--tab);display:grid;grid-template-columns:1fr 1fr}
+.tabbar button{border:0;background:transparent;border-radius:0;flex-direction:column;gap:4px;min-height:var(--tab);color:var(--muted);font-size:.75rem}
+.tabbar button i.ph{font-size:1.5rem}
+.tabbar button[aria-selected=true]{color:var(--accent)}
+
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--tab) + var(--sab) + 12px);max-width:488px;margin:0 auto;background:var(--fg);color:var(--bg);padding:12px 16px;border-radius:var(--r);font-weight:500;z-index:20;animation:in .25s var(--ease)}
+body.logged-out .toast{bottom:calc(16px + var(--sab))}
+
+/* login */
+.login{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;max-width:360px;margin:0 auto;padding:24px 16px;text-align:left}
+.login .logo{width:56px;height:56px;border-radius:var(--r);margin-bottom:24px}
+.login h1{margin:0;font-size:2rem;font-weight:600;letter-spacing:-.035em;line-height:1.1}
+.login .sub{margin:8px 0 32px;color:var(--muted)}
+.login .form{margin:0}
+.login .note{color:var(--muted);font-size:.875rem;margin-top:16px}
 @media (max-width:360px){.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<main>
   <section id="setup" class="login" hidden>
-    <img class="logo" src="icon.svg" alt="" width="84" height="84">
+    <img class="logo" src="icon.svg" alt="" width="56" height="56">
     <h1>Fichaje</h1>
-    <p class="sub">Tu Woffu, en automático</p>
+    <p class="sub">Tu Woffu, en automático.</p>
     <form id="setup-form" class="form">
       <input type="text" name="username" value="fran" autocomplete="username" hidden>
       <label for="pat" class="sr">Contraseña</label>
@@ -112,103 +164,119 @@ a{color:var(--accent)}
   </section>
 
   <div id="app" hidden>
-    <section id="hero" class="card hero">
-      <div class="big" id="hero-big">…</div>
-      <div class="line" id="hero-line"></div>
-      <div class="small" id="hero-small"></div>
-    </section>
+    <main id="v-home" class="wrap" role="tabpanel">
+      <section id="hero" class="hero loading" aria-live="polite">
+        <div class="state"><span class="dot"></span><div class="big" id="hero-big">…</div></div>
+        <div class="line" id="hero-line"></div>
+        <div class="small" id="hero-small"></div>
+      </section>
 
-    <section class="card" style="margin-top:16px">
-      <h2>Próximo fichaje</h2>
-      <div class="next"><div class="t" id="next-t">—</div><div class="w" id="next-w"></div></div>
-    </section>
+      <section class="blk">
+        <h2>Próximo fichaje</h2>
+        <div class="next"><div class="t num" id="next-t"><span class="skel" style="display:inline-block;width:5ch"></span></div><div class="w" id="next-w"></div></div>
+      </section>
 
-    <section class="card" style="margin-top:16px">
-      <h2 id="hoy-h">Hoy</h2>
-      <ul id="hoy"></ul>
-    </section>
+      <section class="blk">
+        <h2 id="hoy-h">Hoy</h2>
+        <ul id="hoy"><li class="skel" style="height:44px;margin:4px 0"></li><li class="skel" style="height:44px;margin:4px 0"></li></ul>
+      </section>
 
-    <section class="card" style="margin-top:16px">
-      <h2>Avisos</h2>
-      <ul id="avisos"></ul>
-    </section>
+      <section class="blk">
+        <h2>Tu semana</h2>
+        <div id="semana" class="semana"></div>
+        <p class="leyenda"><span><i class="ph ph-house-line"></i>Remoto</span><span><i class="ph ph-buildings"></i>Oficina</span><span><i class="ph ph-handshake"></i>Cliente</span></p>
+        <h2 class="sub">Próximos días con cambios</h2>
+        <ul id="cambios"></ul>
+      </section>
 
-    <section class="card" style="margin-top:16px">
-      <h2>Pídemelo</h2>
-      <div id="chat-log" class="chat-log"><div class="msg bot">Dime qué cambia: «el jueves voy a oficina», «vacaciones del 20 al 24»… o sube una captura de Vision.</div></div>
-      <form id="chat-form" class="chat-form">
-        <label class="clip" title="Subir captura"><input id="chat-img" type="file" accept="image/*" hidden>📎</label>
-        <input id="chat-in" placeholder="Escribe aquí…" autocomplete="off">
-        <button class="primary" type="submit" aria-label="Enviar">➤</button>
-      </form>
-      <div id="chat-prev" class="empty" hidden></div>
-    </section>
+      <section class="blk">
+        <h2>Avisos</h2>
+        <ul id="avisos"><li class="skel" style="height:40px;margin:4px 0"></li></ul>
+      </section>
 
-    <section class="card" style="margin-top:16px">
-      <h2>Cambiar algo</h2>
-      <div class="grid2">
-        <button data-quick="hoy">Hoy no fichar</button>
-        <button data-quick="manana">Mañana no fichar</button>
-        <button data-open="f-vac">Vacaciones</button>
-        <button data-open="f-modo">Remoto / oficina</button>
-        <button data-open="f-hor">Otro horario</button>
-        <button data-open="f-corr">Corregir hoy</button>
-      </div>
-
-      <form id="f-vac" class="form" hidden>
-        <label for="vac-desde">Desde</label><input id="vac-desde" type="date" required>
-        <label for="vac-hasta">Hasta (incluido)</label><input id="vac-hasta" type="date" required>
-        <label for="vac-nota">Nota</label><input id="vac-nota" placeholder="Vacaciones aprobadas en Vision">
-        <button class="primary" type="submit">Guardar vacaciones</button>
-      </form>
-      <form id="f-modo" class="form" hidden>
-        <label for="modo-fecha">Día</label><input id="modo-fecha" type="date" required>
-        <label for="modo-valor">Fichar como</label>
-        <select id="modo-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
-        <button class="primary" type="submit">Guardar</button>
-      </form>
-      <form id="f-hor" class="form" hidden>
-        <label for="hor-fecha">Día</label><input id="hor-fecha" type="date" required>
+      <section class="blk">
+        <h2>Cambiar algo</h2>
         <div class="grid2">
-          <label for="h1">Entrada<input id="h1" type="time" value="08:00" required></label>
-          <label for="h2">Comida<input id="h2" type="time" value="13:00"></label>
-          <label for="h3">Vuelta<input id="h3" type="time" value="14:00"></label>
-          <label for="h4">Salida<input id="h4" type="time" value="17:00" required></label>
+          <button data-quick="hoy"><i class="ph ph-prohibit"></i>Hoy no fichar</button>
+          <button data-quick="manana"><i class="ph ph-calendar-x"></i>Mañana no fichar</button>
+          <button data-open="f-vac"><i class="ph ph-airplane-tilt"></i>Vacaciones</button>
+          <button data-open="f-modo"><i class="ph ph-house-line"></i>Remoto / oficina</button>
+          <button data-open="f-hor"><i class="ph ph-clock"></i>Otro horario</button>
+          <button data-open="f-corr"><i class="ph ph-pencil-simple"></i>Corregir hoy</button>
         </div>
-        <button class="primary" type="submit">Guardar horario</button>
-      </form>
-      <form id="f-corr" class="form" hidden>
-        <p class="empty" style="margin:0">Todavía no sé cambiar en Woffu un fichaje ya hecho. Si lo pides, te dejo un aviso como recordatorio. Mientras tanto, cámbialo a mano: Woffu → Mis fichajes → hoy → motivo.</p>
-        <label for="corr-valor">Todo hoy como</label>
-        <select id="corr-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
-        <button class="primary" type="submit">Pedir corrección</button>
-      </form>
+
+        <form id="f-vac" class="form" hidden>
+          <label for="vac-desde">Desde</label><input id="vac-desde" type="date" required>
+          <label for="vac-hasta">Hasta (incluido)</label><input id="vac-hasta" type="date" required>
+          <label for="vac-nota">Nota</label><input id="vac-nota" placeholder="Vacaciones aprobadas en Vision">
+          <button class="primary" type="submit">Guardar vacaciones</button>
+        </form>
+        <form id="f-modo" class="form" hidden>
+          <label for="modo-fecha">Día</label><input id="modo-fecha" type="date" required>
+          <label for="modo-valor">Fichar como</label>
+          <select id="modo-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
+          <button class="primary" type="submit">Guardar</button>
+        </form>
+        <form id="f-hor" class="form" hidden>
+          <label for="hor-fecha">Día</label><input id="hor-fecha" type="date" required>
+          <div class="grid2">
+            <label for="h1">Entrada<input id="h1" type="time" value="08:00" required></label>
+            <label for="h2">Comida<input id="h2" type="time" value="13:00"></label>
+            <label for="h3">Vuelta<input id="h3" type="time" value="14:00"></label>
+            <label for="h4">Salida<input id="h4" type="time" value="17:00" required></label>
+          </div>
+          <button class="primary" type="submit">Guardar horario</button>
+        </form>
+        <form id="f-corr" class="form" hidden>
+          <p class="empty" style="margin:0">Todavía no sé cambiar en Woffu un fichaje ya hecho. Si lo pides, te dejo un aviso como recordatorio. Mientras tanto, cámbialo a mano: Woffu, Mis fichajes, hoy, motivo.</p>
+          <label for="corr-valor">Todo hoy como</label>
+          <select id="corr-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
+          <button class="primary" type="submit">Pedir corrección</button>
+        </form>
+      </section>
+
+      <section id="token" class="blk">
+        <h2>Acceso a Woffu</h2>
+        <p id="token-txt" style="margin:0 0 4px"></p>
+        <details>
+          <summary>Renovar 90 días más (1 minuto)</summary>
+          <ol>
+            <li>Solo la primera vez, en el ordenador: arrastra este botón a la barra de marcadores: <a class="bm" id="bm">Renovar Fichaje</a></li>
+            <li>Entra en <a href="https://migso-pcubed.woffu.com" target="_blank" rel="noopener">Woffu</a> con Microsoft, como siempre.</li>
+            <li>Con Woffu abierto, pulsa el marcador «Renovar Fichaje». Te dirá la fecha nueva.</li>
+          </ol>
+        </details>
+      </section>
+
+      <div class="foot"><p>Woffu es lo oficial. Aquí ves lo que la rutina leyó en su última pasada.</p><button class="ghost" id="logout" type="button"><i class="ph ph-sign-out"></i>Salir</button></div>
+    </main>
+
+    <section id="v-chat" role="tabpanel" hidden>
+      <div class="chat-head">Chat<small>Dime qué cambia y lo preparo</small></div>
+      <div id="chat-log" class="chat-log">
+        <div class="msg bot">Hola. Dime qué cambia en tu horario o sube una captura de Vision. Antes de guardar nada, te lo enseño.</div>
+        <div class="ejemplos" id="ejemplos">
+          <button type="button" data-ex="A partir de ahora jueves y viernes en remoto">A partir de ahora jueves y viernes en remoto</button>
+          <button type="button" data-ex="Vacaciones del 20 al 24 de octubre">Vacaciones del 20 al 24 de octubre</button>
+          <button type="button" data-ex="El martes salgo a las 15:00">El martes salgo a las 15:00</button>
+        </div>
+      </div>
+      <div class="composer">
+        <div id="chat-prev" class="empty" hidden></div>
+        <form id="chat-form" class="chat-form">
+          <label class="clip" title="Subir captura"><input id="chat-img" type="file" accept="image/*" hidden><i class="ph ph-paperclip"></i><span class="sr">Subir captura</span></label>
+          <input id="chat-in" placeholder="Escribe aquí" autocomplete="off" aria-label="Mensaje">
+          <button class="primary" type="submit" aria-label="Enviar"><i class="ph ph-paper-plane-right"></i></button>
+        </form>
+      </div>
     </section>
 
-    <section class="card" style="margin-top:16px">
-      <h2>Tu semana</h2>
-      <p id="semana" style="margin:0 0 18px"></p>
-      <h2>Próximos días con cambios</h2>
-      <ul id="cambios"></ul>
-    </section>
-
-    <section id="token" class="card" style="margin-top:16px">
-      <h2>Acceso a Woffu</h2>
-      <p id="token-txt" style="margin:0 0 8px"></p>
-      <details>
-        <summary>Renovar 90 días más (1 minuto)</summary>
-        <ol>
-          <li>Solo la primera vez, en el ordenador: arrastra este botón a la barra de marcadores → <a class="bm" id="bm">Renovar Fichaje</a></li>
-          <li>Entra en <a href="https://migso-pcubed.woffu.com" target="_blank" rel="noopener">Woffu</a> con Microsoft, como siempre.</li>
-          <li>Con Woffu abierto, pulsa el marcador «Renovar Fichaje». Te dirá ✅ y la fecha nueva.</li>
-        </ol>
-      </details>
-    </section>
-
-    <p class="empty" style="text-align:center;font-size:.85rem;margin-top:16px">Woffu es lo oficial: aquí ves lo que la rutina leyó de Woffu en su última pasada. <button class="ghost" id="logout" type="button">Cerrar sesión</button></p>
+    <div class="tabbar"><nav role="tablist">
+      <button role="tab" id="tab-home" data-tab="home" aria-selected="true"><i class="ph ph-house"></i>Inicio</button>
+      <button role="tab" id="tab-chat" data-tab="chat" aria-selected="false"><i class="ph ph-chat-circle"></i>Chat</button>
+    </nav></div>
   </div>
-</main>
-<div id="toast" class="toast" hidden></div>
+<div id="toast" class="toast" hidden role="status"></div>
 
 <script>
 const API = "https://fichaje-api.fichaje-api.workers.dev/f/";
@@ -259,12 +327,12 @@ function render() {
   // Hero: what Woffu said last time
   const hero = $("hero");
   if (estado && estado.actualizado && estado.actualizado.startsWith(hoy)) {
-    hero.className = "card hero " + (estado.dentro ? "in" : "out");
+    hero.className = "hero " + (estado.dentro ? "in" : "out");
     $("hero-big").textContent = estado.dentro ? "Dentro" : "Fuera";
     $("hero-line").textContent = (estado.dentro ? "desde las " + estado.desde + (estado.motivo ? " · " + estado.motivo : "") : "") + (estado.horas_hoy ? (estado.dentro ? " · " : "") + "hoy llevas " + estado.horas_hoy.replace(":", " h ") + " min" : "");
     $("hero-small").textContent = "Leído de Woffu a las " + estado.actualizado.slice(11);
   } else {
-    hero.className = "card hero out";
+    hero.className = "hero out";
     $("hero-big").textContent = "Sin datos de hoy";
     $("hero-line").textContent = "La rutina aún no ha mirado Woffu hoy.";
     $("hero-small").textContent = estado && estado.actualizado ? "Último dato: " + estado.actualizado : "";
@@ -276,14 +344,14 @@ function render() {
   const ul = $("hoy"); ul.replaceChildren();
   if (plan.libre) {
     const li = document.createElement("li"); li.className = "step";
-    li.innerHTML = '<span class="h">—</span><span></span><span class="chip off"></span>';
+    li.innerHTML = '<span class="h num">–</span><span></span><span class="chip off"></span>';
     li.children[1].textContent = plan.libre; li.lastChild.textContent = "No se ficha"; ul.append(li);
   } else {
     const hechos = estado && estado.actualizado && estado.actualizado.startsWith(hoy) ? estado.tramos || [] : [];
     const marcas = hechos.flatMap(t => [t.in, t.out].filter(Boolean));
     for (const p of plan.pasos) {
       const li = document.createElement("li"); li.className = "step";
-      const h = document.createElement("span"); h.className = "h"; h.textContent = p.h;
+      const h = document.createElement("span"); h.className = "h num"; h.textContent = p.h;
       const w = document.createElement("span"); w.textContent = p.tipo; if (p.modo) { const s = document.createElement("div"); s.className = "s"; s.textContent = NOMBRE[p.modo]; w.append(s); }
       const c = document.createElement("span"); c.className = "chip";
       const hecho = marcas.some(m => Math.abs(min(m) - min(p.h)) <= 15);
@@ -314,13 +382,14 @@ function render() {
   if (!ult.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Todavía no hay avisos."; av.append(li); }
   for (const a of ult) {
     const li = document.createElement("li"); li.className = "aviso";
-    const i = document.createElement("span"); i.className = "ico " + (a.ok ? "ok" : "bad"); i.textContent = a.ok ? "✓" : "!";
+    const i = document.createElement("span"); i.className = "ico " + (a.ok ? "ok" : "bad"); i.innerHTML = a.ok ? '<i class="ph ph-check"></i>' : '<i class="ph ph-warning"></i>';
     const t = document.createElement("div"); const b = document.createElement("b"); b.textContent = a.accion + (a.motivo ? " · " + a.motivo : "");
-    const s = document.createElement("span"); s.textContent = (a.cuando.startsWith(hoy) ? "hoy " + a.cuando.slice(11) : a.cuando) + (a.detalle ? " — " + a.detalle : "");
+    const s = document.createElement("span"); s.textContent = (a.cuando.startsWith(hoy) ? "hoy " + a.cuando.slice(11) : a.cuando) + (a.detalle ? " · " + a.detalle : "");
     t.append(b, s); li.append(i, t); av.append(li);
   }
 
-  $("semana").textContent = ["1","2","3","4","5"].map(d => DIAS_SEM[d].slice(0,1).toUpperCase() + DIAS_SEM[d].slice(1,3) + " " + (cfg.modo_por_dia[d] === "teletrabajo" ? "🏠" : cfg.modo_por_dia[d] === "cliente" ? "🤝" : "🏢")).join("  ·  ") + "   (🏠 remoto · 🏢 oficina)";
+  const IC = { teletrabajo: "house-line", cliente: "handshake", oficina: "buildings" };
+  $("semana").innerHTML = ["1","2","3","4","5"].map(d => `<div class="dia" title="${NOMBRE[cfg.modo_por_dia[d]] || "En oficina MP"}"><span>${DIAS_SEM[d].slice(0,3)}</span><i class="ph ph-${IC[cfg.modo_por_dia[d]] || "buildings"}"></i></div>`).join("");
   // Upcoming changes
   const cu = $("cambios"); cu.replaceChildren();
   const fut = exc.filter(e => e.fecha >= hoy && !e.hecho).sort((a, b) => a.fecha.localeCompare(b.fecha));
@@ -347,8 +416,8 @@ async function cargar() {
   try {
     const [c, e, a, s] = await Promise.all(["config.json", "excepciones.json", "avisos.json", "estado.json"].map(leer));
     cfg = c.data; exc = e.data; excSha = e.sha; avisos = a.data; estado = s.data;
-    $("setup").hidden = true; $("app").hidden = false; render(); tokenInfo();
-  } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; } else if ($("app").hidden) { $("hero-big").textContent = "No he podido cargar"; $("hero-line").textContent = err.message; $("app").hidden = false; } }
+    $("setup").hidden = true; $("app").hidden = false; document.body.classList.remove("logged-out"); render(); tokenInfo();
+  } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; document.body.classList.add("logged-out"); } else if ($("app").hidden) { $("hero").className = "hero out"; $("hero-big").textContent = "No he podido cargar"; $("hero-line").textContent = err.message; $("app").hidden = false; } }
 }
 
 // Write with one retry on a stale sha (the routine may have written meanwhile)
@@ -418,12 +487,12 @@ $("chat-img").onchange = async () => {
   const s = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
   c.width = img.width * s; c.height = img.height * s; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
   chatImg = c.toDataURL("image/jpeg", 0.85);
-  $("chat-prev").hidden = false; $("chat-prev").textContent = "📎 Captura lista: escribe algo o pulsa ➤";
+  $("chat-prev").hidden = false; $("chat-prev").innerHTML = '<i class="ph ph-image"></i>'; $("chat-prev").append("Captura lista: escribe algo o pulsa enviar");
 };
 $("chat-form").onsubmit = async ev => {
   ev.preventDefault();
   const texto = $("chat-in").value.trim(); if (!texto && !chatImg) return;
-  burbuja("me", texto, chatImg); chatMsgs.push({ role: "user", content: texto || "Mira esta captura." });
+  $("ejemplos").hidden = true; burbuja("me", texto, chatImg); chatMsgs.push({ role: "user", content: texto || "Mira esta captura." });
   const img = chatImg; chatImg = null; $("chat-in").value = ""; $("chat-prev").hidden = true; $("chat-img").value = "";
   const espera = burbuja("bot", "Pensando…");
   try {
@@ -439,15 +508,25 @@ $("chat-form").onsubmit = async ev => {
       b.onclick = async () => { b.disabled = true;
         const fijos = cambios.filter(c => c.tipo === "MODO_FIJO" && /^[1-5]$/.test(c.dia) && NOMBRE[c.valor]), sueltos = cambios.filter(c => c.tipo !== "MODO_FIJO");
         if (fijos.length) { try { const c = await leer("config.json"); fijos.forEach(f => c.data.modo_por_dia[f.dia] = f.valor); await escribir("config.json", c.data, c.sha, "Semana nueva desde el chat"); cfg = c.data; render(); toast("Semana cambiada"); } catch (e) { toast(e.message); b.disabled = false; return; } }
-        if (sueltos.length) await anadir(sueltos.map(c => ({ fecha: c.fecha, tipo: c.tipo, valor: c.valor || "", nota: c.nota || "" })), "Desde el chat", "Guardado"); b.textContent = "✓ Guardado"; };
+        if (sueltos.length) await anadir(sueltos.map(c => ({ fecha: c.fecha, tipo: c.tipo, valor: c.valor || "", nota: c.nota || "" })), "Desde el chat", "Guardado"); b.textContent = "Guardado"; };
       box.append(b); espera.append(box);
     }
   } catch (e) { espera.textContent = "No he podido responder: " + e.message; }
 };
 
+function setTab(t) {
+  if (t !== "chat") t = "home";
+  $("v-home").hidden = t !== "home"; $("v-chat").hidden = t !== "chat";
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
+  ls.set("tab", t); window.scrollTo(0, 0);
+  if (t === "chat") $("chat-log").scrollTop = 1e9;
+}
+document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => setTab(b.dataset.tab));
+document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("chat-in").value = b.dataset.ex; $("chat-in").focus(); });
+setTab(ls.get("tab"));
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
-if (PAT) cargar(); else $("setup").hidden = false;
+if (PAT) cargar(); else { $("setup").hidden = false; document.body.classList.add("logged-out"); }
 document.addEventListener("visibilitychange", () => { if (!document.hidden && PAT) cargar(); });
 </script>
 </body>
