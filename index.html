@@ -66,19 +66,32 @@ input,select{background:var(--bg);border:1px solid var(--line);border-radius:10p
 details summary{cursor:pointer;color:var(--accent);font-weight:700}
 details ol{padding-left:20px;display:grid;gap:6px;margin:10px 0 0}
 a{color:var(--accent)}
+.login{min-height:calc(100dvh - 32px);display:flex;flex-direction:column;justify-content:center;text-align:center;padding:0 8px}
+.login[hidden]{display:none}
+.login .logo{width:84px;height:84px;margin:0 auto 18px;border-radius:24px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-size:2.6rem;box-shadow:0 10px 30px rgba(15,107,79,.35)}
+.login h1{margin:0;font-size:2.2rem}
+.login .sub{margin:4px 0 28px;color:var(--muted)}
+.login .form{margin:0}
+.login input{font-size:1.15rem;text-align:center;min-height:58px;border-radius:14px;background:var(--card)}
+.login button{border-radius:14px;font-size:1.1rem}
+.login .note{color:var(--muted);font-size:.85rem;margin-top:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (max-width:360px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main>
-  <section id="setup" class="card" hidden>
-    <h2>Entrar</h2>
+  <section id="setup" class="login" hidden>
+    <div class="logo" aria-hidden="true">⏱</div>
+    <h1>Fichaje</h1>
+    <p class="sub">Tu Woffu, en automático</p>
     <form id="setup-form" class="form">
       <input type="text" name="username" value="fran" autocomplete="username" hidden>
-      <label for="pat">Contraseña</label>
-      <input id="pat" type="password" autocomplete="current-password" required>
+      <label for="pat" class="sr">Contraseña</label>
+      <input id="pat" type="password" placeholder="Contraseña" autocomplete="current-password" required>
       <button class="primary" type="submit">Entrar</button>
     </form>
+    <p class="note">Solo una vez: este móvil te recuerda 6 meses.</p>
   </section>
 
   <div id="app" hidden>
