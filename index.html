@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#047857">
+<!-- Not black-translucent: iOS 26/27 home-screen apps lose the status bar height for good after the keyboard closes -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -106,7 +107,7 @@ details ol{padding-left:20px;display:grid;gap:8px;margin:4px 0 0}
 .foot p{margin:0;max-width:34ch}
 
 /* chat */
-#v-chat{position:fixed;left:0;right:0;top:0;height:calc(var(--H,100dvh) - var(--tab) - var(--sab));max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg)}
+#v-chat{position:fixed;left:0;right:0;top:0;bottom:calc(var(--tab) + var(--sab));max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg)}
 .chat-head{padding:calc(14px + var(--sat)) 16px 12px;border-bottom:1px solid var(--line);font-weight:600;font-size:1.0625rem;letter-spacing:-.01em}
 .chat-head small{display:block;font-weight:400;font-size:.8125rem;color:var(--muted);letter-spacing:0}
 .chat-log{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
@@ -130,9 +131,10 @@ details ol{padding-left:20px;display:grid;gap:8px;margin:4px 0 0}
 
 /* iPhone keyboard: while typing hide the tab bar and fit the chat to the visible area */
 body.typing .tabbar{display:none}
+body.typing #v-chat{bottom:auto}
 body.typing .composer{padding-bottom:8px}
 /* tab bar */
-.tabbar{position:fixed;left:0;right:0;top:calc(var(--H,100dvh) - var(--tab) - var(--sab));z-index:10;background:var(--bg);border-top:1px solid var(--line);padding-bottom:var(--sab)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line);padding-bottom:var(--sab)}
 .tabbar nav{max-width:520px;margin:0 auto;height:var(--tab);display:grid;grid-template-columns:1fr 1fr}
 .tabbar button{border:0;background:transparent;border-radius:0;flex-direction:column;gap:4px;min-height:var(--tab);color:var(--muted);font-size:.75rem}
 .tabbar button i.ph{font-size:1.5rem}
@@ -577,11 +579,6 @@ $("fichar-btn").onclick = async () => {
 };
 
 
-// iOS (26/27, home-screen app) shrinks the layout viewport by the status bar height after the keyboard
-// closes and never restores it, so anything anchored to the bottom stays raised. Anchor from the top
-// with the real screen height instead (--H).
-const setH = () => document.documentElement.style.setProperty("--H", (navigator.standalone ? screen.height : innerHeight) + "px");
-setH(); addEventListener("resize", () => { if (!document.body.classList.contains("typing")) setH(); });
 // iOS moves fixed elements when the keyboard opens and leaves them shifted after it closes.
 // While typing: pin the chat to the visual viewport. On blur: restore and scroll the page back.
 (() => {
@@ -594,10 +591,6 @@ setH(); addEventListener("resize", () => { if (!document.body.classList.contains
   $("chat-form").querySelector("button[type=submit]").addEventListener("pointerdown", e => { if (document.activeElement === input) e.preventDefault(); });
 })();
 
-// DEBUG-VV (temporal)
-(() => { const d=document.createElement("div"); d.style.cssText="position:fixed;top:330px;left:4px;z-index:99;background:#ff0;color:#000;font:bold 16px monospace;padding:2px;pointer-events:none;white-space:pre";
- document.documentElement.append(d); const vv=visualViewport; window.LOGV=[]; setInterval(()=>{ d.textContent=`ih${innerHeight} vh${Math.round(vv.height)} ot${Math.round(vv.offsetTop)} sy${scrollY}\n`+LOGV.join("\n"); },300);
- $("chat-in").addEventListener("blur",()=>{ LOGV=[]; setTimeout(()=>{ LOGV.push("pre "+innerHeight); const m=document.querySelector("meta[name=viewport]"), c=m.content; m.content=c+",maximum-scale=1"; setTimeout(()=>{ m.content=c; LOGV.push("B "+innerHeight); setTimeout(()=>{ document.body.style.minHeight="calc(100% + 2px)"; window.scrollTo(0,2); setTimeout(()=>{ window.scrollTo(0,0); document.body.style.minHeight=""; LOGV.push("A "+innerHeight); },100); },600); },100); },600); }); })();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
 if (PAT) cargar(); else { $("setup").hidden = false; document.body.classList.add("logged-out"); }
