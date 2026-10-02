@@ -381,15 +381,19 @@ function render() {
     li.innerHTML = '<span class="h num">–</span><span></span><span class="chip off"></span>';
     li.children[1].textContent = plan.libre; li.lastChild.textContent = "No se ficha"; ul.append(li);
   } else {
+    // Real clock events from Woffu first, then the plan steps still to come
     const hechos = estado && estado.actualizado && estado.actualizado.startsWith(hoy) ? estado.tramos || [] : [];
-    const marcas = hechos.flatMap(t => [t.in, t.out].filter(Boolean));
-    for (const p of plan.pasos) {
+    const reales = hechos.flatMap(t => [{ h: t.in, tipo: "Entrada", motivo: t.motivo, real: true }].concat(t.out ? [{ h: t.out, tipo: "Salida", real: true }] : []));
+    const ultima = reales.length ? min(reales[reales.length - 1].h) : -1;
+    const pendientes = plan.pasos.filter(p => min(p.h) > ultima + 15);
+    for (const p of [...reales, ...pendientes]) {
       const li = document.createElement("li"); li.className = "step";
       const h = document.createElement("span"); h.className = "h num"; h.textContent = p.h;
-      const w = document.createElement("span"); w.textContent = p.tipo; if (p.modo) { const s = document.createElement("div"); s.className = "s"; s.textContent = NOMBRE[p.modo]; w.append(s); }
+      const w = document.createElement("span"); w.textContent = p.tipo;
+      const sub = p.real ? p.motivo : p.modo && NOMBRE[p.modo];
+      if (sub) { const s = document.createElement("div"); s.className = "s"; s.textContent = sub; w.append(s); }
       const c = document.createElement("span"); c.className = "chip";
-      const hecho = marcas.some(m => Math.abs(min(m) - min(p.h)) <= 15);
-      if (hecho) { c.classList.add("ok"); c.textContent = "Hecho"; }
+      if (p.real) { c.classList.add("ok"); c.textContent = "Hecho"; }
       else if (min(ahora) > min(p.h) + 20) { c.classList.add("bad"); c.textContent = "Sin fichar"; }
       else { c.classList.add("wait"); c.textContent = "Pendiente"; }
       li.append(h, w, c); ul.append(li);
