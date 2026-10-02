@@ -145,6 +145,10 @@ body.logged-out .toast{bottom:calc(16px + var(--sab))}
 .login .sub{margin:8px 0 32px;color:var(--muted)}
 .login .form{margin:0}
 .login .note{color:var(--muted);font-size:.875rem;margin-top:16px}
+.fichar{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:18px}
+.fichar.solo-salida{grid-template-columns:1fr}
+.fichar.solo-salida select{display:none}
+.fichar button{min-height:52px;padding:0 22px}
 @media (max-width:360px){.grid2{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -169,6 +173,14 @@ body.logged-out .toast{bottom:calc(16px + var(--sab))}
         <div class="state"><span class="dot"></span><div class="big" id="hero-big">…</div></div>
         <div class="line" id="hero-line"></div>
         <div class="small" id="hero-small"></div>
+        <div class="fichar">
+          <select id="fichar-modo" aria-label="Motivo de la entrada">
+            <option value="teletrabajo">Teletrabajo</option>
+            <option value="oficina">En oficina MP</option>
+            <option value="cliente">En cliente</option>
+          </select>
+          <button class="primary" id="fichar-btn" type="button">Fichar</button>
+        </div>
       </section>
 
       <section class="blk">
@@ -338,6 +350,12 @@ function render() {
     $("hero-small").textContent = estado && estado.actualizado ? "Último dato: " + estado.actualizado : "";
   }
 
+  const dentroAhora = !!(estado && estado.actualizado && estado.actualizado.startsWith(hoy) && estado.dentro);
+  $("fichar-btn").textContent = dentroAhora ? "Fichar salida" : "Fichar entrada";
+  $("fichar-btn").dataset.armed = "";
+  $("fichar-btn").closest(".fichar").classList.toggle("solo-salida", dentroAhora);
+  if (!$("fichar-modo").dataset.tocado) { const pl = planDe(hoy); $("fichar-modo").value = pl.modo || cfg.modo_por_dia[String(dowMad(now))] || "teletrabajo"; }
+
   // Today's steps
   const plan = planDe(hoy);
   $("hoy-h").textContent = "Hoy · " + fechaBonita(hoy);
@@ -416,7 +434,7 @@ async function cargar() {
   try {
     const [c, e, a, s] = await Promise.all(["config.json", "excepciones.json", "avisos.json", "estado.json"].map(leer));
     cfg = c.data; exc = e.data; excSha = e.sha; avisos = a.data; estado = s.data;
-    $("setup").hidden = true; $("app").hidden = false; document.body.classList.remove("logged-out"); render(); tokenInfo();
+    $("setup").hidden = true; $("app").hidden = false; document.body.classList.remove("logged-out"); render(); tokenInfo(); vivo();
   } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; document.body.classList.add("logged-out"); } else if ($("app").hidden) { $("hero").className = "hero out"; $("hero-big").textContent = "No he podido cargar"; $("hero-line").textContent = err.message; $("app").hidden = false; } }
 }
 
@@ -524,6 +542,37 @@ function setTab(t) {
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => setTab(b.dataset.tab));
 document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("chat-in").value = b.dataset.ex; $("chat-in").focus(); });
 setTab(ls.get("tab"));
+
+// Live state straight from Woffu through the server, so the top of the page is never stale
+function aplicarVivo(j) {
+  const ahora = new Date(), t = j.tramos || [];
+  const mins = t.reduce((s, x) => s + Math.max(0, (x.out ? min(x.out) : min(hhmmMad(ahora))) - min(x.in)), 0);
+  const last = t[t.length - 1];
+  estado = { actualizado: ahoraIso().replace("T", " "), dentro: j.dentro, desde: j.dentro ? last.in : null, motivo: j.dentro ? last.motivo : null, horas_hoy: Math.floor(mins / 60) + ":" + String(mins % 60).padStart(2, "0"), tramos: t };
+  render();
+}
+async function vivo() {
+  try {
+    const r = await fetch("https://fichaje-api.fichaje-api.workers.dev/estado", { headers: { Authorization: "Bearer " + PAT } });
+    const j = await r.json();
+    if (r.ok) aplicarVivo(j); else if (r.status === 409) toast(j.error);
+  } catch {}
+}
+$("fichar-modo").onchange = () => { $("fichar-modo").dataset.tocado = "1"; };
+$("fichar-btn").onclick = async () => {
+  const b = $("fichar-btn");
+  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; const t = b.textContent; b.textContent = "¿Seguro? Pulsa otra vez"; setTimeout(() => { if (b.dataset.armed === "1") { b.dataset.armed = ""; b.textContent = t; } }, 4000); return; }
+  b.disabled = true; b.textContent = "Fichando…";
+  try {
+    const r = await fetch("https://fichaje-api.fichaje-api.workers.dev/fichar", { method: "POST", headers: { Authorization: "Bearer " + PAT, "Content-Type": "application/json" }, body: JSON.stringify({ modo: $("fichar-modo").value }) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    aplicarVivo(j); toast(j.dentro ? "Entrada fichada" : "Salida fichada");
+    leer("avisos.json").then(a => { avisos = a.data; render(); }).catch(() => {});
+  } catch (e) { toast("No se ha fichado: " + e.message); render(); }
+  b.disabled = false;
+};
+
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
 if (PAT) cargar(); else { $("setup").hidden = false; document.body.classList.add("logged-out"); }
