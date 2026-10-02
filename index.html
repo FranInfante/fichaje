@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f6b4f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fichaje">
+<title>Fichaje</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#f3f5f4; --card:#ffffff; --fg:#14201b; --muted:#5b6b64; --line:#dde4e0;
+  --in:#0f6b4f; --in-bg:#e2f3ec; --out:#8a5a00; --out-bg:#fbf0dc; --bad:#b3261e; --bad-bg:#fbe5e3;
+  --accent:#0f6b4f; --accent-fg:#ffffff;
+  --font:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0e1412; --card:#17201c; --fg:#e8efec; --muted:#9aaba3; --line:#2a3631;
+  --in:#5fd3a5; --in-bg:#123a2c; --out:#f0b44c; --out-bg:#3a2b10; --bad:#ff8a80; --bad-bg:#3d1714;
+  --accent:#5fd3a5; --accent-fg:#06231a; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font:18px/1.45 var(--font);padding:16px;padding-block:calc(16px + env(safe-area-inset-top)) calc(32px + env(safe-area-inset-bottom))}
+main{max-width:520px;margin:0 auto;display:grid;gap:16px}
+h2{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.hero{border:0;padding:22px 18px}
+.hero.in{background:var(--in-bg);color:var(--in)}
+.hero.out{background:var(--out-bg);color:var(--out)}
+.hero .big{font-size:2.6rem;font-weight:700;line-height:1;margin:2px 0 8px}
+.hero .line{font-size:1.15rem;color:var(--fg)}
+.hero .small{font-size:.9rem;color:var(--muted);margin-top:8px}
+.next{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.next .t{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.next .w{font-size:1.1rem}
+.next .w small{display:block;color:var(--muted);font-size:.9rem}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.step{display:grid;grid-template-columns:4.2rem 1fr auto;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
+.step .h{font-weight:700;font-size:1.15rem}
+.step .s{color:var(--muted);font-size:.9rem}
+.chip{font-size:.85rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.chip.ok{background:var(--in-bg);color:var(--in)} .chip.wait{background:var(--line);color:var(--muted)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.off{background:var(--out-bg);color:var(--out)}
+.aviso{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.aviso .ico{width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;font-weight:700}
+.aviso .ico.ok{background:var(--in-bg);color:var(--in)} .aviso .ico.bad{background:var(--bad-bg);color:var(--bad)}
+.aviso b{display:block} .aviso span{color:var(--muted);font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button,select,input{font:inherit;color:var(--fg)}
+button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:14px 12px;cursor:pointer;font-weight:700;min-height:56px}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.ghost{min-height:auto;padding:6px 12px;font-weight:400}
+button:disabled{opacity:.5}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.form{display:grid;gap:10px;margin-top:12px}
+.form[hidden]{display:none}
+label{display:grid;gap:4px;font-size:.9rem;color:var(--muted)}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:48px;width:100%}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.row .d{font-weight:700;font-variant-numeric:tabular-nums}
+.row small{display:block;color:var(--muted)}
+.empty{color:var(--muted)}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:var(--fg);color:var(--bg);padding:14px 16px;border-radius:12px;font-weight:700}
+.warn{border-color:var(--bad)}
+details summary{cursor:pointer;color:var(--accent);font-weight:700}
+details ol{padding-left:20px;display:grid;gap:6px;margin:10px 0 0}
+a{color:var(--accent)}
+@media (max-width:360px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <section id="setup" class="card" hidden>
+    <h2>Conectar</h2>
+    <p style="margin-top:0">Pega aquí tu clave de GitHub (solo una vez en este móvil). Se queda guardada en este navegador y no sale de él.</p>
+    <form id="setup-form" class="form">
+      <label for="pat">Clave de GitHub (empieza por <code>github_pat_</code>)</label>
+      <input id="pat" type="password" autocomplete="off" required>
+      <button class="primary" type="submit">Conectar</button>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <section id="hero" class="card hero">
+      <div class="big" id="hero-big">…</div>
+      <div class="line" id="hero-line"></div>
+      <div class="small" id="hero-small"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Próximo fichaje</h2>
+      <div class="next"><div class="t" id="next-t">—</div><div class="w" id="next-w"></div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2 id="hoy-h">Hoy</h2>
+      <ul id="hoy"></ul>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Avisos</h2>
+      <ul id="avisos"></ul>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Cambiar algo</h2>
+      <div class="grid2">
+        <button data-quick="hoy">Hoy no fichar</button>
+        <button data-quick="manana">Mañana no fichar</button>
+        <button data-open="f-vac">Vacaciones</button>
+        <button data-open="f-modo">Remoto / oficina</button>
+        <button data-open="f-hor">Otro horario</button>
+        <button data-open="f-corr">Corregir hoy</button>
+      </div>
+
+      <form id="f-vac" class="form" hidden>
+        <label for="vac-desde">Desde</label><input id="vac-desde" type="date" required>
+        <label for="vac-hasta">Hasta (incluido)</label><input id="vac-hasta" type="date" required>
+        <label for="vac-nota">Nota</label><input id="vac-nota" placeholder="Vacaciones aprobadas en Vision">
+        <button class="primary" type="submit">Guardar vacaciones</button>
+      </form>
+      <form id="f-modo" class="form" hidden>
+        <label for="modo-fecha">Día</label><input id="modo-fecha" type="date" required>
+        <label for="modo-valor">Fichar como</label>
+        <select id="modo-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
+        <button class="primary" type="submit">Guardar</button>
+      </form>
+      <form id="f-hor" class="form" hidden>
+        <label for="hor-fecha">Día</label><input id="hor-fecha" type="date" required>
+        <div class="grid2">
+          <label for="h1">Entrada<input id="h1" type="time" value="08:00" required></label>
+          <label for="h2">Comida<input id="h2" type="time" value="13:00"></label>
+          <label for="h3">Vuelta<input id="h3" type="time" value="14:00"></label>
+          <label for="h4">Salida<input id="h4" type="time" value="17:00" required></label>
+        </div>
+        <button class="primary" type="submit">Guardar horario</button>
+      </form>
+      <form id="f-corr" class="form" hidden>
+        <p class="empty" style="margin:0">Cambia el motivo de los fichajes de hoy que ya están hechos. La rutina lo corrige en Woffu en su siguiente pasada (a los :50).</p>
+        <label for="corr-valor">Todo hoy como</label>
+        <select id="corr-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
+        <button class="primary" type="submit">Pedir corrección</button>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Próximos días con cambios</h2>
+      <ul id="cambios"></ul>
+    </section>
+
+    <section id="token" class="card" style="margin-top:16px">
+      <h2>Acceso a Woffu</h2>
+      <p id="token-txt" style="margin:0 0 8px"></p>
+      <details>
+        <summary>Renovar 90 días más</summary>
+        <ol>
+          <li>En el ordenador, entra en Woffu con Microsoft.</li>
+          <li>F12 → Application → Cookies → <code>woffu.token</code> → copia el valor.</li>
+          <li><a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a> → «Woffu autofichaje» → Edit → nube «Woffu» → engranaje → API credentials → pega el valor nuevo.</li>
+          <li>Pulsa aquí: <button class="ghost" id="token-renovado" type="button">Ya lo he renovado</button></li>
+        </ol>
+      </details>
+    </section>
+
+    <p class="empty" style="text-align:center;font-size:.85rem;margin-top:16px">Woffu es lo oficial: aquí ves lo que la rutina leyó de Woffu en su última pasada. <button class="ghost" id="logout" type="button">Desconectar este móvil</button></p>
+  </div>
+</main>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const REPO = "FranInfante/fichaje-datos";
+const API = "https://api.github.com/repos/" + REPO + "/contents/";
+const DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const NOMBRE = { teletrabajo: "Teletrabajo", oficina: "En oficina MP", cliente: "En cliente" };
+const $ = id => document.getElementById(id);
+let PAT = null, cfg = null, exc = [], excSha = null, avisos = [], estado = null;
+
+const ls = { get(k){ try { return localStorage.getItem(k) } catch { return null } }, set(k,v){ try { localStorage.setItem(k,v) } catch {} }, del(k){ try { localStorage.removeItem(k) } catch {} } };
+const isoMad = d => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Madrid" });
+const hhmmMad = d => d.toLocaleTimeString("es-ES", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit" });
+const dowMad = d => new Date(isoMad(d) + "T12:00:00").getDay();
+const fechaBonita = iso => { const d = new Date(iso + "T12:00:00"); return DIAS[d.getDay()] + " " + d.getDate() + "/" + (d.getMonth() + 1); };
+const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
+const b64enc = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3500); }
+
+async function gh(path, opts = {}) {
+  const r = await fetch(API + path, { ...opts, headers: { Authorization: "Bearer " + PAT, Accept: "application/vnd.github+json", ...(opts.headers || {}) }, cache: "no-store" });
+  if (r.status === 401) { ls.del("pat"); throw new Error("La clave de GitHub no vale o ha caducado. Vuelve a conectar."); }
+  if (!r.ok) throw new Error("GitHub respondió " + r.status);
+  return r.json();
+}
+async function leer(file) { const j = await gh(file); return { data: JSON.parse(b64dec(j.content)), sha: j.sha }; }
+async function escribir(file, data, sha, msg) {
+  return gh(file, { method: "PUT", body: JSON.stringify({ message: msg, content: b64enc(JSON.stringify(data, null, 2) + "\n"), sha }) });
+}
+
+// Today's plan: base schedule unless an exception says otherwise
+function planDe(iso) {
+  const dow = new Date(iso + "T12:00:00").getDay();
+  const delDia = exc.filter(e => e.fecha === iso);
+  if (dow === 0 || dow === 6) return { libre: "Fin de semana" };
+  const nf = delDia.find(e => e.tipo === "NO_FICHAR");
+  if (nf) return { libre: nf.nota || "No se ficha" };
+  const hor = delDia.find(e => e.tipo === "HORARIO");
+  const modo = (delDia.find(e => e.tipo === "MODO") || {}).valor || cfg.modo_por_dia[String(dow)] || "oficina";
+  const tramos = (hor ? hor.valor.split(/\s+/) : cfg.horario_base).map(t => t.split("-"));
+  const pasos = [];
+  tramos.forEach(([a, b], i) => { pasos.push({ h: a, tipo: "Entrada", modo }); if (b) pasos.push({ h: b, tipo: i === tramos.length - 1 ? "Salida" : "Salida a comer" }); });
+  return { modo, pasos, cambiado: !!hor };
+}
+
+function render() {
+  const now = new Date(), hoy = isoMad(now), ahora = hhmmMad(now);
+  // Hero: what Woffu said last time
+  const hero = $("hero");
+  if (estado && estado.actualizado && estado.actualizado.startsWith(hoy)) {
+    hero.className = "card hero " + (estado.dentro ? "in" : "out");
+    $("hero-big").textContent = estado.dentro ? "Dentro" : "Fuera";
+    $("hero-line").textContent = (estado.dentro ? "desde las " + estado.desde + (estado.motivo ? " · " + estado.motivo : "") : "") + (estado.horas_hoy ? (estado.dentro ? " · " : "") + "hoy llevas " + estado.horas_hoy.replace(":", " h ") + " min" : "");
+    $("hero-small").textContent = "Leído de Woffu a las " + estado.actualizado.slice(11);
+  } else {
+    hero.className = "card hero out";
+    $("hero-big").textContent = "Sin datos de hoy";
+    $("hero-line").textContent = "La rutina aún no ha mirado Woffu hoy.";
+    $("hero-small").textContent = estado && estado.actualizado ? "Último dato: " + estado.actualizado : "";
+  }
+
+  // Today's steps
+  const plan = planDe(hoy);
+  $("hoy-h").textContent = "Hoy · " + fechaBonita(hoy);
+  const ul = $("hoy"); ul.replaceChildren();
+  if (plan.libre) {
+    const li = document.createElement("li"); li.className = "step";
+    li.innerHTML = '<span class="h">—</span><span></span><span class="chip off"></span>';
+    li.children[1].textContent = plan.libre; li.lastChild.textContent = "No se ficha"; ul.append(li);
+  } else {
+    const hechos = estado && estado.actualizado && estado.actualizado.startsWith(hoy) ? estado.tramos || [] : [];
+    const marcas = hechos.flatMap(t => [t.in, t.out].filter(Boolean));
+    for (const p of plan.pasos) {
+      const li = document.createElement("li"); li.className = "step";
+      const h = document.createElement("span"); h.className = "h"; h.textContent = p.h;
+      const w = document.createElement("span"); w.textContent = p.tipo; if (p.modo) { const s = document.createElement("div"); s.className = "s"; s.textContent = NOMBRE[p.modo]; w.append(s); }
+      const c = document.createElement("span"); c.className = "chip";
+      const hecho = marcas.some(m => Math.abs(min(m) - min(p.h)) <= 15);
+      if (hecho) { c.classList.add("ok"); c.textContent = "Hecho"; }
+      else if (min(ahora) > min(p.h) + 20) { c.classList.add("bad"); c.textContent = "Sin fichar"; }
+      else { c.classList.add("wait"); c.textContent = "Pendiente"; }
+      li.append(h, w, c); ul.append(li);
+    }
+  }
+
+  // Next clock event (today or next working day)
+  let next = null;
+  for (let i = 0; i < 10 && !next; i++) {
+    const d = new Date(now.getTime() + i * 864e5), iso = isoMad(d), pl = planDe(iso);
+    if (pl.libre) continue;
+    const p = pl.pasos.find(p => i > 0 || min(p.h) > min(ahora));
+    if (p) next = { iso, p, i };
+  }
+  if (next) {
+    $("next-t").textContent = next.p.h;
+    $("next-w").innerHTML = ""; $("next-w").append(next.p.tipo);
+    const s = document.createElement("small"); s.textContent = (next.i === 0 ? "hoy" : next.i === 1 ? "mañana" : fechaBonita(next.iso)) + (next.p.modo ? " · " + NOMBRE[next.p.modo] : ""); $("next-w").append(s);
+  }
+
+  // Alerts
+  const av = $("avisos"); av.replaceChildren();
+  const ult = [...avisos].sort((a, b) => b.cuando.localeCompare(a.cuando)).slice(0, 8);
+  if (!ult.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Todavía no hay avisos."; av.append(li); }
+  for (const a of ult) {
+    const li = document.createElement("li"); li.className = "aviso";
+    const i = document.createElement("span"); i.className = "ico " + (a.ok ? "ok" : "bad"); i.textContent = a.ok ? "✓" : "!";
+    const t = document.createElement("div"); const b = document.createElement("b"); b.textContent = a.accion + (a.motivo ? " · " + a.motivo : "");
+    const s = document.createElement("span"); s.textContent = (a.cuando.startsWith(hoy) ? "hoy " + a.cuando.slice(11) : a.cuando) + (a.detalle ? " — " + a.detalle : "");
+    t.append(b, s); li.append(i, t); av.append(li);
+  }
+
+  // Upcoming changes
+  const cu = $("cambios"); cu.replaceChildren();
+  const fut = exc.filter(e => e.fecha >= hoy && !e.hecho).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if (!fut.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Nada. Se ficha con el horario de siempre."; cu.append(li); }
+  for (const e of fut) {
+    const li = document.createElement("li"); li.className = "row";
+    const t = document.createElement("div"); const d = document.createElement("span"); d.className = "d"; d.textContent = fechaBonita(e.fecha);
+    const s = document.createElement("small");
+    s.textContent = e.tipo === "NO_FICHAR" ? "No se ficha" + (e.nota ? " · " + e.nota : "") : e.tipo === "MODO" ? "Fichar como " + NOMBRE[e.valor] : e.tipo === "HORARIO" ? "Horario " + e.valor.replace(/ /g, " y ") : "Corregir hoy a " + NOMBRE[e.valor] + " (pendiente)";
+    t.append(d, s);
+    const b = document.createElement("button"); b.className = "ghost"; b.textContent = "Quitar";
+    b.onclick = () => quitar(e.id, b);
+    li.append(t, b); cu.append(li);
+  }
+
+  // Token
+  const dias = Math.ceil((new Date(cfg.token_caduca + "T00:00:00") - now) / 864e5);
+  $("token-txt").textContent = dias > 0 ? `Caduca el ${cfg.token_caduca.split("-").reverse().join("/")} · quedan ${dias} días` : "Caducado: la rutina no puede fichar. Renuévalo.";
+  $("token").classList.toggle("warn", dias <= 7);
+}
+const min = h => { const [a, b] = h.split(":").map(Number); return a * 60 + b; };
+
+async function cargar() {
+  try {
+    const [c, e, a, s] = await Promise.all(["config.json", "excepciones.json", "avisos.json", "estado.json"].map(leer));
+    cfg = c.data; exc = e.data; excSha = e.sha; avisos = a.data; estado = s.data;
+    $("setup").hidden = true; $("app").hidden = false; render();
+  } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; } }
+}
+
+// Write with one retry on a stale sha (the routine may have written meanwhile)
+async function guardarExc(cambio, msg) {
+  for (let i = 0; i < 2; i++) {
+    try { const e = await leer("excepciones.json"); const nuevo = cambio(e.data); await escribir("excepciones.json", nuevo, e.sha, msg); exc = nuevo; render(); return true; }
+    catch (err) { if (i === 1 || !/409|422/.test(err.message)) { toast(err.message); return false; } }
+  }
+}
+const nid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const laborables = (a, b) => { const out = [], d = new Date(a + "T12:00:00"), e = new Date(b + "T12:00:00"); for (let i = 0; d <= e && i < 120; i++, d.setDate(d.getDate() + 1)) if (d.getDay() % 6) out.push(isoMad(d)); return out; };
+const ahoraIso = () => new Date().toLocaleString("sv-SE", { timeZone: "Europe/Madrid" }).slice(0, 16).replace(" ", "T");
+
+async function anadir(items, msg, okMsg) {
+  if (!items.length) { toast("No hay días laborables en esas fechas."); return; }
+  const ok = await guardarExc(list => [...list.filter(e => !items.some(n => n.fecha === e.fecha && n.tipo === e.tipo)), ...items.map(n => ({ id: nid(), creado: ahoraIso(), valor: "", nota: "", ...n }))], msg);
+  if (ok) { toast(okMsg); document.querySelectorAll(".form").forEach(f => { if (f.id !== "setup-form") f.hidden = true; }); }
+}
+async function quitar(id, btn) {
+  if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "¿Seguro?"; setTimeout(() => { btn.dataset.armed = ""; btn.textContent = "Quitar"; }, 4000); return; }
+  btn.disabled = true;
+  if (await guardarExc(list => list.filter(e => e.id !== id), "Quitar cambio")) toast("Quitado");
+  else btn.disabled = false;
+}
+
+document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { const f = $(b.dataset.open); const was = f.hidden; document.querySelectorAll(".form").forEach(x => { if (x.id !== "setup-form") x.hidden = true; }); f.hidden = !was; if (!was) return; const i = f.querySelector("input[type=date]"); if (i && !i.value) i.value = isoMad(new Date()); });
+document.querySelector('[data-quick="hoy"]').onclick = () => anadir([{ fecha: isoMad(new Date()), tipo: "NO_FICHAR", nota: "Desde la app" }], "Hoy no fichar", "Hoy no se ficha");
+document.querySelector('[data-quick="manana"]').onclick = () => { const l = laborables(isoMad(new Date(Date.now() + 864e5)), isoMad(new Date(Date.now() + 4 * 864e5)))[0]; anadir(l ? [{ fecha: l, tipo: "NO_FICHAR", nota: "Desde la app" }] : [], "No fichar " + l, "El " + (l ? fechaBonita(l) : "") + " no se ficha"); };
+$("f-vac").onsubmit = ev => { ev.preventDefault(); const a = $("vac-desde").value, b = $("vac-hasta").value || a; if (b < a) return toast("La fecha final va antes que la inicial."); anadir(laborables(a, b).map(f => ({ fecha: f, tipo: "NO_FICHAR", nota: $("vac-nota").value || "Vacaciones" })), "Vacaciones " + a + " a " + b, "Vacaciones guardadas"); };
+$("f-modo").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: $("modo-fecha").value, tipo: "MODO", valor: $("modo-valor").value }], "Modo", "Guardado"); };
+$("f-hor").onsubmit = ev => { ev.preventDefault(); const [a, b, c, d] = ["h1", "h2", "h3", "h4"].map(i => $(i).value); const v = b && c ? `${a}-${b} ${c}-${d}` : `${a}-${d}`; if (min(a) >= min(d)) return toast("La salida tiene que ser después de la entrada."); anadir([{ fecha: $("hor-fecha").value, tipo: "HORARIO", valor: v }], "Horario", "Horario guardado"); };
+$("f-corr").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: isoMad(new Date()), tipo: "CORREGIR", valor: $("corr-valor").value }], "Corregir hoy", "Corrección pedida: la rutina la hará a los :50"); };
+$("token-renovado").onclick = async () => {
+  const nueva = isoMad(new Date(Date.now() + 90 * 864e5));
+  try { const c = await leer("config.json"); c.data.token_caduca = nueva; await escribir("config.json", c.data, c.sha, "Token renovado"); cfg = c.data; render(); toast("Apuntado: caduca el " + nueva.split("-").reverse().join("/")); } catch (e) { toast(e.message); }
+};
+$("setup-form").onsubmit = ev => { ev.preventDefault(); PAT = $("pat").value.trim(); ls.set("pat", PAT); cargar(); };
+$("logout").onclick = () => { ls.del("pat"); location.reload(); };
+
+PAT = ls.get("pat");
+if (PAT) cargar(); else $("setup").hidden = false;
+document.addEventListener("visibilitychange", () => { if (!document.hidden && PAT) cargar(); });
+</script>
+</body>
+</html>
