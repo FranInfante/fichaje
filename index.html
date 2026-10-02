@@ -128,6 +128,10 @@ details ol{padding-left:20px;display:grid;gap:8px;margin:4px 0 0}
 #chat-in{background:var(--surface)}
 #chat-prev{font-size:.875rem;margin:0 0 8px;display:flex;align-items:center;gap:6px}
 
+/* iPhone keyboard: while typing hide the tab bar and fit the chat to the visible area */
+body.typing .tabbar{display:none}
+body.typing #v-chat{bottom:auto}
+body.typing .composer{padding-bottom:8px}
 /* tab bar */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line);padding-bottom:var(--sab)}
 .tabbar nav{max-width:520px;margin:0 auto;height:var(--tab);display:grid;grid-template-columns:1fr 1fr}
@@ -572,6 +576,17 @@ $("fichar-btn").onclick = async () => {
   } catch (e) { toast("No se ha fichado: " + e.message); render(); }
   b.disabled = false;
 };
+
+
+// iOS moves fixed elements when the keyboard opens and leaves them shifted after it closes.
+// While typing: pin the chat to the visual viewport. On blur: restore and scroll the page back.
+(() => {
+  const vv = window.visualViewport, chat = $("v-chat"), input = $("chat-in");
+  const fit = () => { if (!document.body.classList.contains("typing") || !vv) return; chat.style.top = vv.offsetTop + "px"; chat.style.height = vv.height + "px"; $("chat-log").scrollTop = 1e9; };
+  input.addEventListener("focus", () => { document.body.classList.add("typing"); fit(); setTimeout(fit, 300); });
+  input.addEventListener("blur", () => { setTimeout(() => { if (document.activeElement === input) return; document.body.classList.remove("typing"); chat.style.top = ""; chat.style.height = ""; window.scrollTo(0, 0); }, 100); });
+  if (vv) { vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit); }
+})();
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
