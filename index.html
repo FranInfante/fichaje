@@ -188,7 +188,8 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 async function gh(path, opts = {}) {
   const r = await fetch(API + path, { ...opts, headers: { Authorization: "Bearer " + PAT, ...(opts.headers || {}) }, cache: "no-store" });
   if (r.status === 401) { ls.del("pat"); PAT = null; throw new Error("Vuelve a entrar con tu contraseña."); }
-  if (!r.ok) throw new Error("GitHub respondió " + r.status);
+  if (r.status === 502) throw new Error("El servidor no puede leer tus datos: revisa la clave de GitHub guardada en Cloudflare.");
+  if (!r.ok) throw new Error("Error " + r.status + " al leer tus datos. Prueba en un rato.");
   return r.json();
 }
 async function leer(file) { const j = await gh(file); return { data: JSON.parse(b64dec(j.content)), sha: j.sha }; }
@@ -304,7 +305,7 @@ async function cargar() {
     const [c, e, a, s] = await Promise.all(["config.json", "excepciones.json", "avisos.json", "estado.json"].map(leer));
     cfg = c.data; exc = e.data; excSha = e.sha; avisos = a.data; estado = s.data;
     $("setup").hidden = true; $("app").hidden = false; render();
-  } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; } }
+  } catch (err) { toast(err.message); if (!ls.get("pat")) { $("app").hidden = true; $("setup").hidden = false; } else if ($("app").hidden) { $("hero-big").textContent = "No he podido cargar"; $("hero-line").textContent = err.message; $("app").hidden = false; } }
 }
 
 // Write with one retry on a stale sha (the routine may have written meanwhile)
