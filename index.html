@@ -3,8 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f6b4f">
+<meta name="theme-color" content="#12865f">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Fichaje">
 <title>Fichaje</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -82,7 +86,7 @@ a{color:var(--accent)}
 <body>
 <main>
   <section id="setup" class="login" hidden>
-    <div class="logo" aria-hidden="true">⏱</div>
+    <img class="logo" src="icon.svg" alt="" width="84" height="84">
     <h1>Fichaje</h1>
     <p class="sub">Tu Woffu, en automático</p>
     <form id="setup-form" class="form">
@@ -364,6 +368,7 @@ $("setup-form").onsubmit = async ev => {
 };
 $("logout").onclick = () => { ls.del("pat"); location.reload(); };
 
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 PAT = ls.get("pat");
 if (PAT) cargar(); else $("setup").hidden = false;
 document.addEventListener("visibilitychange", () => { if (!document.hidden && PAT) cargar(); });
