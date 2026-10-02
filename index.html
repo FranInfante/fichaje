@@ -137,7 +137,7 @@ a{color:var(--accent)}
         <button class="primary" type="submit">Guardar horario</button>
       </form>
       <form id="f-corr" class="form" hidden>
-        <p class="empty" style="margin:0">Cambia el motivo de los fichajes de hoy que ya están hechos. La rutina lo corrige en Woffu en su siguiente pasada (a los :50).</p>
+        <p class="empty" style="margin:0">Todavía no sé cambiar en Woffu un fichaje ya hecho. Si lo pides, te dejo un aviso como recordatorio. Mientras tanto, cámbialo a mano: Woffu → Mis fichajes → hoy → motivo.</p>
         <label for="corr-valor">Todo hoy como</label>
         <select id="corr-valor"><option value="teletrabajo">Teletrabajo</option><option value="oficina">En oficina MP</option><option value="cliente">En cliente</option></select>
         <button class="primary" type="submit">Pedir corrección</button>
@@ -337,7 +337,7 @@ document.querySelector('[data-quick="manana"]').onclick = () => { const l = labo
 $("f-vac").onsubmit = ev => { ev.preventDefault(); const a = $("vac-desde").value, b = $("vac-hasta").value || a; if (b < a) return toast("La fecha final va antes que la inicial."); anadir(laborables(a, b).map(f => ({ fecha: f, tipo: "NO_FICHAR", nota: $("vac-nota").value || "Vacaciones" })), "Vacaciones " + a + " a " + b, "Vacaciones guardadas"); };
 $("f-modo").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: $("modo-fecha").value, tipo: "MODO", valor: $("modo-valor").value }], "Modo", "Guardado"); };
 $("f-hor").onsubmit = ev => { ev.preventDefault(); const [a, b, c, d] = ["h1", "h2", "h3", "h4"].map(i => $(i).value); const v = b && c ? `${a}-${b} ${c}-${d}` : `${a}-${d}`; if (min(a) >= min(d)) return toast("La salida tiene que ser después de la entrada."); anadir([{ fecha: $("hor-fecha").value, tipo: "HORARIO", valor: v }], "Horario", "Horario guardado"); };
-$("f-corr").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: isoMad(new Date()), tipo: "CORREGIR", valor: $("corr-valor").value }], "Corregir hoy", "Corrección pedida: la rutina la hará a los :50"); };
+$("f-corr").onsubmit = ev => { ev.preventDefault(); anadir([{ fecha: isoMad(new Date()), tipo: "CORREGIR", valor: $("corr-valor").value }], "Corregir hoy", "Apuntado. Recuerda cambiarlo a mano en Woffu"); };
 $("token-renovado").onclick = async () => {
   const nueva = isoMad(new Date(Date.now() + 90 * 864e5));
   try { const c = await leer("config.json"); c.data.token_caduca = nueva; await escribir("config.json", c.data, c.sha, "Token renovado"); cfg = c.data; render(); toast("Apuntado: caduca el " + nueva.split("-").reverse().join("/")); } catch (e) { toast(e.message); }
